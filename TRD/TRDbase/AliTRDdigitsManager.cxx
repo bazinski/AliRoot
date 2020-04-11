@@ -986,6 +986,8 @@ Bool_t AliTRDdigitsManager::StoreArrayDigits()
 	    }
 	  branch->SetAddress(&kDataArray);
 	  branch->Fill();
+    //  TFile *run3digits=new TFile("trddigits.root","UPDATE");
+    //  std::vector<o2::trd::Digit> run3digit;
 	}
     }
 
