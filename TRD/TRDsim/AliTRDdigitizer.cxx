@@ -41,6 +41,7 @@
 #include <TMath.h>
 #include <TRandom.h>
 #include <TTree.h>
+#include <iostream>
 
 #include "AliRun.h"
 #include "AliMC.h"
@@ -116,7 +117,7 @@ AliTRDdigitizer::AliTRDdigitizer(const Text_t *name, const Text_t *title)
   // AliTRDdigitizer constructor
   //
   //
-  cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% instantiated Digitizer" << endl;
+  std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% instantiated Digitizer" << std::endl;
 
 }
 
@@ -140,7 +141,7 @@ AliTRDdigitizer::AliTRDdigitizer(AliDigitizationInput* digInput
   //
   // AliTRDdigitizer constructor
   //
-  cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% instantiated Digitizer" << endl;
+  std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% instantiated Digitizer" << std::endl;
 
 }
 
@@ -185,7 +186,7 @@ AliTRDdigitizer::AliTRDdigitizer(const AliTRDdigitizer &d)
   //
   // AliTRDdigitizer copy constructor
   //
-  cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% instantiated Digitizer" << endl;
+  std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% instantiated Digitizer" << std::endl;
 
 }
 
@@ -215,7 +216,7 @@ AliTRDdigitizer::~AliTRDdigitizer()
 
   delete fGeo;
   fGeo = 0;
-  cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% deinstantiated Digitizer" << endl;
+  std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% deinstantiated Digitizer" << std::endl;
 
 }
 
@@ -1188,7 +1189,7 @@ Bool_t AliTRDdigitizer::ConvertSignals(Int_t det, AliTRDarraySignal *signals)
   }
   else {
     // Convert the signal array to digits
-    if (!Signal3ADC(det,signals)) {
+    if (!Signal2ADC(det,signals)) {
       return kFALSE;
     }
     // Run digital processing for digits
@@ -1203,7 +1204,7 @@ Bool_t AliTRDdigitizer::ConvertSignals(Int_t det, AliTRDarraySignal *signals)
 }
 
 //_____________________________________________________________________________
-Bool_t AliTRDdigitizer::Signal3ADC(Int_t det, AliTRDarraySignal *signals)
+Bool_t AliTRDdigitizer::Signal2ADC(Int_t det, AliTRDarraySignal *signals)
 {
   //
   // Converts the sampled electron signals to ADC values for a given chamber
