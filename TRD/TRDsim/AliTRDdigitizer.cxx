@@ -41,6 +41,7 @@
 #include <TMath.h>
 #include <TRandom.h>
 #include <TTree.h>
+#include <iostream>
 
 #include "AliRun.h"
 #include "AliMC.h"
@@ -89,6 +90,7 @@ AliTRDdigitizer::AliTRDdigitizer()
   ,fCompress(kTRUE)
   ,fSDigits(kFALSE)
   ,fMergeSignalOnly(kFALSE)
+  ,fDigitCount(0)
 {
   //
   // AliTRDdigitizer default constructor
@@ -111,6 +113,7 @@ AliTRDdigitizer::AliTRDdigitizer(const Text_t *name, const Text_t *title)
   ,fCompress(kTRUE)
   ,fSDigits(kFALSE)
   ,fMergeSignalOnly(kFALSE)
+  ,fDigitCount(0)
 {
   //
   // AliTRDdigitizer constructor
@@ -134,6 +137,7 @@ AliTRDdigitizer::AliTRDdigitizer(AliDigitizationInput* digInput
   ,fCompress(kTRUE)
   ,fSDigits(kFALSE)
   ,fMergeSignalOnly(kFALSE)
+  ,fDigitCount(0)
 {
   //
   // AliTRDdigitizer constructor
@@ -156,6 +160,7 @@ AliTRDdigitizer::AliTRDdigitizer(AliDigitizationInput* digInput)
   ,fCompress(kTRUE)
   ,fSDigits(kFALSE)
   ,fMergeSignalOnly(kFALSE)
+  ,fDigitCount(0)
 {
   //
   // AliTRDdigitizer constructor
@@ -178,6 +183,7 @@ AliTRDdigitizer::AliTRDdigitizer(const AliTRDdigitizer &d)
   ,fCompress(d.fCompress)
   ,fSDigits(d.fSDigits)
   ,fMergeSignalOnly(d.fMergeSignalOnly)
+  ,fDigitCount(0)
 {
   //
   // AliTRDdigitizer copy constructor
@@ -211,7 +217,7 @@ AliTRDdigitizer::~AliTRDdigitizer()
 
   delete fGeo;
   fGeo = 0;
-
+  std::cout << "Digits Produced : "  << fDigitCount << std::endl;
 }
 
 //_____________________________________________________________________________
@@ -1978,6 +1984,7 @@ void AliTRDdigitizer::RunDigitalProcessing(Int_t det)
   for (Int_t side = 0; side <= 1; side++) {
     for(Int_t rob = side; rob < digits->GetNrow() / 2; rob += 2) {
       for(Int_t mcm = 0; mcm < 16; mcm++) {
+    fMcmSim->Print();
 	fMcmSim->Init(det, rob, mcm);
 	fMcmSim->SetDataByPad(digits, fDigitsManager);
 	fMcmSim->Filter();
@@ -1987,6 +1994,8 @@ void AliTRDdigitizer::RunDigitalProcessing(Int_t det)
 	}
 	fMcmSim->ZSMapping();
 	fMcmSim->WriteData(digits);
+    fMcmSim->Draw();
+    fMcmSim->Print();
       }
     }
   }

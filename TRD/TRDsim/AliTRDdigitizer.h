@@ -99,6 +99,7 @@ class AliTRDdigitizer : public AliDigitizer {
           Bool_t       fCompress;           //  Switch to keep only compressed data in memory
           Bool_t       fSDigits;            //  Switch for the summable digits
           Bool_t       fMergeSignalOnly;    //  Merge only detectors that contain a signal
+          UInt_t       fDigitCount;         //  Count of the digits that were digitized
 
   ClassDef(AliTRDdigitizer,20)              //  Produces TRD-Digits
 

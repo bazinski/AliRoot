@@ -407,24 +407,24 @@ void AliTRDmcmSim::Print(Option_t* const option) const
   printf("MCM %i on ROB %i in detector %i\n", fMcmPos, fRobPos, fDetector);
 
   TString opt = option;
-  if (opt.Contains("R") || opt.Contains("F")) {
+//  if (opt.Contains("R") || opt.Contains("F")) {
     std::cout << *this;
-  }
+//  }
 
-  if (opt.Contains("H")) {
+ // if (opt.Contains("H")) {
     printf("Found %i hits:\n", fNHits);
     for (Int_t iHit = 0; iHit < fNHits; iHit++) {
       printf("Hit %3i in timebin %2i, ADC %2i has charge %3i and position %3i\n",
              iHit,  fHits[iHit].fTimebin, fHits[iHit].fChannel, fHits[iHit].fQtot, fHits[iHit].fYpos);
     }
-  }
+//  }
 
-  if (opt.Contains("T")) {
+//  if (opt.Contains("T")) {
     printf("Tracklets:\n");
     for (Int_t iTrkl = 0; iTrkl < fTrackletArray->GetEntriesFast(); iTrkl++) {
       printf("tracklet %i: 0x%08x\n", iTrkl, ((AliTRDtrackletMCM*) (*fTrackletArray)[iTrkl])->GetTrackletWord());
     }
-  }
+//  }
 }
 
 void AliTRDmcmSim::Draw(Option_t* const option)
@@ -443,30 +443,37 @@ void AliTRDmcmSim::Draw(Option_t* const option)
 
   TString opt = option;
 
+  TH2F *hist1 = new TH2F("mcmdataf", Form("Filtered Data of MCM %i on ROB %i in detector %i", \
+                                        fMcmPos, fRobPos, fDetector), \
+                        AliTRDfeeParam::GetNadcMcm(), -0.5, AliTRDfeeParam::GetNadcMcm()-.5, fNTimeBin, -.5, fNTimeBin-.5);
   TH2F *hist = new TH2F("mcmdata", Form("Data of MCM %i on ROB %i in detector %i", \
                                         fMcmPos, fRobPos, fDetector), \
                         AliTRDfeeParam::GetNadcMcm(), -0.5, AliTRDfeeParam::GetNadcMcm()-.5, fNTimeBin, -.5, fNTimeBin-.5);
   hist->GetXaxis()->SetTitle("ADC Channel");
   hist->GetYaxis()->SetTitle("Timebin");
   hist->SetStats(kFALSE);
+  hist1->GetXaxis()->SetTitle("ADC Channel");
+  hist1->GetYaxis()->SetTitle("Timebin");
+  hist1->SetStats(kFALSE);
 
-  if (opt.Contains("R")) {
+//  if (opt.Contains("R")) {
     for (Int_t iTimeBin = 0; iTimeBin < fNTimeBin; iTimeBin++) {
       for (Int_t iAdc = 0; iAdc < AliTRDfeeParam::GetNadcMcm(); iAdc++) {
         hist->SetBinContent(iAdc+1, iTimeBin+1, fADCR[iAdc][iTimeBin] >> fgkAddDigits);
       }
     }
-  }
-  else {
+ // }
+//  else {
     for (Int_t iTimeBin = 0; iTimeBin < fNTimeBin; iTimeBin++) {
       for (Int_t iAdc = 0; iAdc < AliTRDfeeParam::GetNadcMcm(); iAdc++) {
         hist->SetBinContent(iAdc+1, iTimeBin+1, fADCF[iAdc][iTimeBin] >> fgkAddDigits);
       }
     }
-  }
+//  }
   hist->Draw("colz");
+  hist1->Draw("colz");
 
-  if (opt.Contains("H")) {
+//  if (opt.Contains("H")) {
     TGraph *grHits = new TGraph();
     for (Int_t iHit = 0; iHit < fNHits; iHit++) {
       grHits->SetPoint(iHit,
@@ -474,9 +481,9 @@ void AliTRDmcmSim::Draw(Option_t* const option)
                        fHits[iHit].fTimebin);
     }
     grHits->Draw("*");
-  }
+//  }
 
-  if (opt.Contains("T")) {
+//  if (opt.Contains("T")) {
     TLine *trklLines = new TLine[4];
     for (Int_t iTrkl = 0; iTrkl < fTrackletArray->GetEntries(); iTrkl++) {
       AliTRDtrackletMCM *trkl = (AliTRDtrackletMCM*) (*fTrackletArray)[iTrkl];
@@ -499,7 +506,7 @@ void AliTRDmcmSim::Draw(Option_t* const option)
       printf("Tracklet %i: y = %f, dy = %f, offset = %f\n", iTrkl, trkl->GetY(), (trkl->GetdY() * 140e-4), offset);
       trklLines[iTrkl].Draw();
     }
-  }
+//  }
 }
 
 void AliTRDmcmSim::SetData( Int_t adc, const Int_t* const data )
