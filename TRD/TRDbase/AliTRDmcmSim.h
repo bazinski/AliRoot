@@ -16,6 +16,7 @@
 class TObject;
 class TClonesArray;
 class TH2F;
+class TRandom3;
 
 class AliRunLoader;
 class AliTRDfeeParam;
@@ -258,7 +259,7 @@ class AliTRDmcmSim : public TObject {
   static Int_t fgAddBaseline;             // add baseline to the ADC values
 
   static Bool_t fgStoreClusters;          // whether to store all clusters in the tracklets
-
+  TRandom3 *frandomnum;
   ClassDef(AliTRDmcmSim,7)
 };
 

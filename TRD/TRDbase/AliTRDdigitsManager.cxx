@@ -23,6 +23,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <TTree.h>                                                              
+#include <iostream>
 
 #include "AliLog.h"
 
@@ -975,6 +976,7 @@ Bool_t AliTRDdigitsManager::StoreArrayDigits()
 	    }
 	  branch->SetAddress(&kDataArray);
 	  branch->Fill();
+      std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ fHasSDigits" << std::endl;
 	}
       else
 	{
@@ -986,9 +988,20 @@ Bool_t AliTRDdigitsManager::StoreArrayDigits()
 	    }
 	  branch->SetAddress(&kDataArray);
 	  branch->Fill();
-	}
-    }
+      std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ !fHasSDigits" << std::endl;
+//      kDataArray->Expand();
+      for(int row=0;row<kDataArray->GetNrow();row++){
+        for(int col=0;col<kDataArray->GetNcol();col++){
+            std::cout << "Det:"<<iDet<<":"<<row<<":"<< col << ":" << kDataArray->GetNtime() << std::endl; 
+            for(int time=0;time<kDataArray->GetNtime();time++){
+                std::cout << time <<":" << kDataArray->GetData(row,col,time) << " ";
+            }
+            std::cout << std::endl;
 
+        }
+	  }
+    }
+  }
   return status;
 
 }

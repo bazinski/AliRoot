@@ -33,6 +33,7 @@
 #include "TGraph.h"
 #include "TLine.h"
 #include "TRandom.h"
+#include "TRandom3.h"
 #include "TClonesArray.h"
 #include "TMath.h"
 #include <TTree.h>
@@ -100,6 +101,7 @@ AliTRDmcmSim::AliTRDmcmSim() :
   fFitPtr[1] = 0;
   fFitPtr[2] = 0;
   fFitPtr[3] = 0;
+  frandomnum=new TRandom3();
 }
 
 AliTRDmcmSim::~AliTRDmcmSim()
@@ -127,6 +129,7 @@ AliTRDmcmSim::~AliTRDmcmSim()
 
     fTrackletArray->Delete();
     delete fTrackletArray;
+    delete frandomnum;
   }
 }
 
@@ -442,11 +445,11 @@ void AliTRDmcmSim::Draw(Option_t* const option)
     return;
 
   TString opt = option;
-
-  TH2F *hist1 = new TH2F("mcmdataf", Form("Filtered Data of MCM %i on ROB %i in detector %i", \
+  
+  TH2F *hist1 = new TH2F(Form("mcmdatafF_%i_%i_%i_%f",fDetector,fRobPos,fMcmPos,frandomnum->Rndm()), Form("Filtered Data of MCM %i on ROB %i in detector %i", \
                                         fMcmPos, fRobPos, fDetector), \
                         AliTRDfeeParam::GetNadcMcm(), -0.5, AliTRDfeeParam::GetNadcMcm()-.5, fNTimeBin, -.5, fNTimeBin-.5);
-  TH2F *hist = new TH2F("mcmdata", Form("Data of MCM %i on ROB %i in detector %i", \
+  TH2F *hist = new TH2F(Form("mcmdata_%i_%i_%i_%f",fDetector,fRobPos,fMcmPos,frandomnum->Rndm()),Form("Data of MCM %i on ROB %i in detector %i", \
                                         fMcmPos, fRobPos, fDetector), \
                         AliTRDfeeParam::GetNadcMcm(), -0.5, AliTRDfeeParam::GetNadcMcm()-.5, fNTimeBin, -.5, fNTimeBin-.5);
   hist->GetXaxis()->SetTitle("ADC Channel");
@@ -641,7 +644,8 @@ void AliTRDmcmSim::SetDataByPad(const AliTRDarrayADC* const adcArray, AliTRDdigi
 
   Int_t offset = (fMcmPos % 4 + 1) * 18 + (fRobPos % 2) * 72 + 1;
 
-  for (Int_t iTimeBin = 0; iTimeBin < fNTimeBin; iTimeBin++) {
+ // std::cout << "PAD-Data : " << fDetector << "::"<< fRobPos <<"::" <<fMcmPos <<":t"<<fNTimeBin<<"--";
+    for (Int_t iTimeBin = 0; iTimeBin < fNTimeBin; iTimeBin++) {
     for (Int_t iAdc = 0; iAdc < AliTRDfeeParam::GetNadcMcm(); iAdc++) {
       Int_t value = -1;
       Int_t pad = offset - iAdc;
@@ -651,13 +655,18 @@ void AliTRDmcmSim::SetDataByPad(const AliTRDarrayADC* const adcArray, AliTRDdigi
       if (value < 0 || (offset - iAdc < 1) || (offset - iAdc > 165)) {
         fADCR[iAdc][iTimeBin] = fTrapConfig->GetTrapReg(AliTRDtrapConfig::kFPNP, fDetector, fRobPos, fMcmPos) + (fgAddBaseline << fgkAddDigits);
         fADCF[iAdc][iTimeBin] = fTrapConfig->GetTrapReg(AliTRDtrapConfig::kTPFP, fDetector, fRobPos, fMcmPos) + (fgAddBaseline << fgkAddDigits);
+   //     std::cout << iAdc << ":"<< iTimeBin << ":0:"<<fADCR[iAdc][iTimeBin];
+  //      if(iTimeBin=fNTimeBin-1) std::cout <<",";
       }
       else {
         fZSMap[iAdc] = 0;
         fADCR[iAdc][iTimeBin] = (value << fgkAddDigits) + (fgAddBaseline << fgkAddDigits);
         fADCF[iAdc][iTimeBin] = (value << fgkAddDigits) + (fgAddBaseline << fgkAddDigits);
+  //      std::cout << iAdc << ":"<< iTimeBin << ":"<<value<<":"<<fADCR[iAdc][iTimeBin];
+  //      if(iTimeBin=fNTimeBin-1) std::cout <<",";
       }
     }
+ // std::cout << std::endl;
   }
 }
 
@@ -2271,6 +2280,18 @@ ostream& operator<<(ostream& os, const AliTRDmcmSim& mcm)
       os << "tb " << std::setw(2) << iTimeBin << ":";
       for (Int_t iChannel = 0; iChannel < AliTRDfeeParam::GetNadcMcm(); iChannel++) {
         os << std::setw(5) << (mcm.fADCR[iChannel][iTimeBin] >> mcm.fgkAddDigits);
+      }
+      os << std::endl;
+    }
+    os << "----- Unfiltered ADC data (10 bit) -----" << std::endl;
+    os << "ch    ";
+    for (Int_t iChannel = 0; iChannel < AliTRDfeeParam::GetNadcMcm(); iChannel++)
+      os << std::setw(5) << iChannel;
+    os << std::endl;
+    for (Int_t iTimeBin = 0; iTimeBin < mcm.fNTimeBin; iTimeBin++) {
+      os << "tb " << std::setw(2) << iTimeBin << ":";
+      for (Int_t iChannel = 0; iChannel < AliTRDfeeParam::GetNadcMcm(); iChannel++) {
+        os << std::setw(5) << (mcm.fADCR[iChannel][iTimeBin] );
       }
       os << std::endl;
     }
