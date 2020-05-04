@@ -471,7 +471,7 @@ class AliTRDtrapConfig : public TNamed
 		  kDMDELA,
 		  kDMDELS,
 		  kLastReg };   // enum of all TRAP registers, to be used for access to them
-
+  TString GetConfigName(){ return fName;}
   Bool_t SetTrapRegAlloc(TrapReg_t reg, Alloc_t mode) { return fRegisterValue[reg].Allocate(mode); }
   Bool_t SetTrapReg(TrapReg_t reg, Int_t value, Int_t det);
   Bool_t SetTrapReg(TrapReg_t reg, Int_t value, Int_t det, Int_t rob, Int_t mcm);
@@ -530,7 +530,6 @@ class AliTRDtrapConfig : public TNamed
 
     virtual Bool_t Allocate(Alloc_t mode);
 
-  protected:
     Bool_t SetData(UInt_t value);
     Bool_t SetData(UInt_t value, Int_t det);
     Bool_t SetData(UInt_t value, Int_t det, Int_t rob, Int_t mcm);
@@ -538,8 +537,11 @@ class AliTRDtrapConfig : public TNamed
     UInt_t GetData(Int_t det, Int_t rob, Int_t mcm) const;
 
     Int_t  GetIdx(Int_t det, Int_t rob, Int_t mcm) const;
+    int GetAllocMode(){return (int)fAllocMode;}
+    unsigned int GetDataRaw(int i){return fData[i];}
+    unsigned int GetValidRaw(int i){return fValid[i];}
+    unsigned int GetDataSize() { return fSize; }
 
-  private:
     AliTRDtrapValue(const AliTRDtrapValue &rhs); // not implemented
     AliTRDtrapValue& operator=(const AliTRDtrapValue &rhs); // not implemented
 
@@ -571,7 +573,6 @@ class AliTRDtrapConfig : public TNamed
     UShort_t GetNbits() const { return fNbits; }
     UInt_t   GetResetValue() const { return fResetValue; }
 
-  protected:
     AliTRDtrapRegister(const AliTRDtrapRegister &rhs);
     AliTRDtrapRegister& operator=(const AliTRDtrapRegister &rhs);
 
@@ -600,7 +601,6 @@ class AliTRDtrapConfig : public TNamed
     void    SetAddress(UShort_t addr) { fAddr = addr; fName.Form("DMEM 0x%04x", fAddr); }
     const char* GetName() const { return fName.Data(); }
 
-  protected:
     AliTRDtrapDmemWord(const AliTRDtrapDmemWord &rhs); // not implemented
     AliTRDtrapDmemWord& operator=(const AliTRDtrapDmemWord &rhs); // not implemented
 
@@ -610,7 +610,6 @@ class AliTRDtrapConfig : public TNamed
     ClassDef(AliTRDtrapDmemWord, 1);
   };
 
- protected:
   void InitRegs();
 
   // configuration registers
@@ -626,7 +625,6 @@ class AliTRDtrapConfig : public TNamed
   static const Int_t fgkRegisterAddressBlockStart[];
   static const Int_t fgkRegisterAddressBlockSize[];
 
- private:
   AliTRDtrapConfig& operator=(const AliTRDtrapConfig &rhs); // not implemented
   AliTRDtrapConfig(const AliTRDtrapConfig& cfg); // not implemented
 

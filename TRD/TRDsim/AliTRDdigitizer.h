@@ -42,6 +42,7 @@ class AliTRDdigitizer : public AliDigitizer {
           Bool_t       InitDetector();
           void         InitOutput(Int_t iEvent);
   virtual void         Digitize(const Option_t * option = 0);  
+          void         DumpTrapConfig();
 
   virtual Bool_t       Open(const Char_t *file, Int_t nEvent = 0);
   virtual Bool_t       Open(AliRunLoader * const runLoader, Int_t nEvent = 0);

@@ -143,6 +143,8 @@ void AliTRDmcmSim::Init( Int_t det, Int_t robPos, Int_t mcmPos, Bool_t /* newEve
   if (!fInitialized) {
     fFeeParam      = AliTRDfeeParam::Instance();
     fTrapConfig    = AliTRDcalibDB::Instance()->GetTrapConfig();
+
+   //std::cout << "--------------------------------@@@@@@@@@@@@@@@@@@@ TrapConfig name is : " << fTrapConfig->GetConfigName() << std::endl;
   }
 
   fDetector      = det;
@@ -176,8 +178,12 @@ void AliTRDmcmSim::Init( Int_t det, Int_t robPos, Int_t mcmPos, Bool_t /* newEve
   }
 
   fInitialized = kTRUE;
+   //std::cout << "--------------------------------@@@@@@@@@@@@@@@@@@@ before reset TrapConfig name is : " << fTrapConfig->GetConfigName() << std::endl;
 
   Reset();
+  // std::cout << "--------------------------------@@@@@@@@@@@@@@@@@@@ after reset TrapConfig name is : " << fTrapConfig->GetConfigName() << std::endl;
+ //  DumpTrapConfig();
+ //  exit(7);
 }
 
 void AliTRDmcmSim::Reset()
@@ -849,6 +855,7 @@ void AliTRDmcmSim::Filter()
   // sequentially for parameter tuning.
   //
 
+ //  std::cout << "ENTER: " << __FILE__ << ":" << __func__ << ":" << __LINE__ << std::endl;
   if( !CheckInitialized() )
     return;
 
@@ -862,7 +869,6 @@ void AliTRDmcmSim::Filter()
   FilterPedestal();
   FilterGain();
   FilterTail();
-  // Crosstalk filter not implemented.
 }
 
 void AliTRDmcmSim::FilterPedestalInit(Int_t baseline)
@@ -881,6 +887,7 @@ UShort_t AliTRDmcmSim::FilterPedestalNextSample(Int_t adc, Int_t timebin, UShort
   // Returns the output of the pedestal filter given the input value.
   // The output depends on the internal registers and, thus, the
   // history of the filter.
+    std::cout << "ENTER: " << __FILE__ << ":" << __func__ << ":" << __LINE__ << std::endl;
 
   UShort_t    fpnp = fTrapConfig->GetTrapReg(AliTRDtrapConfig::kFPNP, fDetector, fRobPos, fMcmPos); // 0..511 -> 0..127.75, pedestal at the output
   UShort_t    fptc = fTrapConfig->GetTrapReg(AliTRDtrapConfig::kFPTC, fDetector, fRobPos, fMcmPos); // 0..3, 0 - fastest, 3 - slowest
@@ -899,6 +906,7 @@ UShort_t AliTRDmcmSim::FilterPedestalNextSample(Int_t adc, Int_t timebin, UShort
     fPedAcc[adc] = (fPedAcc[adc] + correction) & 0x7FFFFFFF;             // 31 bits
   }
 
+    std::cout << "LEAVE: " << __FILE__ << ":" << __func__ << ":" << __LINE__ << std::endl;
   if (fpby == 0)
     return value;
 
@@ -924,12 +932,16 @@ void AliTRDmcmSim::FilterPedestal()
   // It has only an effect if previous samples have been fed to
   // find the pedestal. Currently, the simulation assumes that
   // the input has been stable for a sufficiently long time.
+    std::cout << "ENTER: " << __FILE__ << ":" << __func__ << ":" << __LINE__ << std::endl;
 
   for (Int_t iTimeBin = 0; iTimeBin < fNTimeBin; iTimeBin++) {
     for (Int_t iAdc = 0; iAdc < AliTRDfeeParam::GetNadcMcm(); iAdc++) {
+        int oldadc = fADCF[iAdc][iTimeBin];
       fADCF[iAdc][iTimeBin] = FilterPedestalNextSample(iAdc, iTimeBin, fADCR[iAdc][iTimeBin]);
+        std::cout << "fADCF : time : " << iTimeBin << " adc : " << iAdc << " changed : " << oldadc <<" -> " << fADCF[iAdc][iTimeBin] << std::endl;
     }
   }
+    std::cout << "LEAVE: " << __FILE__ << ":" << __func__ << ":" << __LINE__ << std::endl;
 }
 
 void AliTRDmcmSim::FilterGainInit()
@@ -979,10 +991,9 @@ UShort_t AliTRDmcmSim::FilterGainNextSample(Int_t adc, UShort_t value)
     else if (corr >= fgta)
       fGainCounterA[adc]++;
   }
-
-  if (fgby == 1)
-    return corr;
-  else
+//  if (fgby == 1)
+//    return corr;
+//  else
     return value;
 }
 
@@ -1237,7 +1248,7 @@ void AliTRDmcmSim::CalcFitreg()
   // Detect the hits and fill the fit registers.
   // Requires 12-bit data from fADCF which means Filter()
   // has to be called before even if all filters are bypassed.
-
+  //std::cout  << "ENTERING : " << __FILE__ << ":" << __func__ << ":" << __LINE__<<" :: "<< GetDetector()<<":"<< GetRobPos()<<":"<< GetMcmPos() << std::endl;
   //??? to be clarified:
   UInt_t adcMask = 0xffffffff;
 
@@ -1321,6 +1332,14 @@ void AliTRDmcmSim::CalcFitreg()
 			  << "qright=" << adcRight
 			  << "\n";
 	}
+/*	if (qtotTemp > 130) {
+      std::cout << "testtree"
+			  << "qtot=" << qtotTemp
+			  << "qleft=" << adcLeft
+			  << "qcent=" << adcCentral
+			  << "qright=" << adcRight
+			  << "for :" << GetDetector()<<":"<< GetRobPos()<<":"<< GetMcmPos() << ":adcleft:"<<adcch<<":t"<<timebin;
+    }*/
         if ( (hitQual) &&
              (qtotTemp >= fTrapConfig->GetTrapReg(AliTRDtrapConfig::kTPHT, fDetector, fRobPos, fMcmPos)) &&
              (adcLeft <= adcCentral) &&
@@ -1331,8 +1350,10 @@ void AliTRDmcmSim::CalcFitreg()
       }
       else
         qTotal[adcch] = 0; //jkl
-      if (qTotal[adcch] != 0)
+      if (qTotal[adcch] != 0){
         AliDebug(10,Form("ch %2d   qTotal %5d",adcch, qTotal[adcch]));
+  //    std::cout <<"ch " << adcch <<  "   qTotal " <<  qTotal[adcch] << std::endl;
+      }
     }
 
     fromLeft = -1;
@@ -1367,6 +1388,7 @@ void AliTRDmcmSim::CalcFitreg()
     }
 
     AliDebug(10,Form("Fromleft=%d, Fromright=%d",fromLeft, fromRight));
+//std::cout  <<"Fromleft="<< fromLeft << "  Fromright="<< fromRight << std::endl;
     // here mask the hit candidates in the middle, if any
     if ((fromLeft >= 0) && (fromRight >= 0) && (fromLeft < fromRight))
       for (adcch = fromLeft+1; adcch < fromRight; adcch++)
@@ -1384,6 +1406,7 @@ void AliTRDmcmSim::CalcFitreg()
       {
         qMarked[found] = qTotal[marked[found]] >> 4;
         AliDebug(10,Form("ch_%d qTotal %d qTotals %d",marked[found],qTotal[marked[found]],qMarked[found]));
+ //   std::cout << "ch_"<< marked[found] << " qTotal "<< qTotal[marked[found]] << " qTotals " << qMarked[found] << std::endl;
       }
 
       Sort6To2Worst(marked[0], marked[3], marked[4], marked[1], marked[2], marked[5],
@@ -1420,7 +1443,12 @@ void AliTRDmcmSim::CalcFitreg()
         AliDebug(10, Form("Hit found, time=%d, adcch=%d/%d/%d, adc values=%d/%d/%d, regTPFP=%d, TPHT=%d\n",
                timebin, adcch, adcch+1, adcch+2, adcLeft, adcCentral, adcRight, regTPFP,
                fTrapConfig->GetTrapReg(AliTRDtrapConfig::kTPHT, fDetector, fRobPos, fMcmPos)));
+    //    std::cout << "Hit found, time=" << timebin << ", adcch=" << adcch << "/" << adcch + 1 << "/"                                                                                                                                                   
+      //            << adcch + 2 << ", adc values=" << adcLeft << "/" << adcCentral << "/"
+        //          << adcRight << ", regTPFP=" << regTPFP << ", TPHT=" << fTrapConfig->GetTrapReg(AliTRDtrapConfig::kTPHT, fDetector, fRobPos, fMcmPos) << std::endl;
 
+        
+        
         if (adcLeft  < regTPFP) adcLeft  = 0; else adcLeft  -= regTPFP;
         if (adcCentral  < regTPFP) adcCentral  = 0; else adcCentral  -= regTPFP;
         if (adcRight < regTPFP) adcRight = 0; else adcRight -= regTPFP;
@@ -1495,6 +1523,7 @@ void AliTRDmcmSim::CalcFitreg()
                        fFitReg[iAdc].fSumY2,
                        fFitReg[iAdc].fSumXY
                  ));
+  //    std::cout << "fitreg[" << iAdc << "]: nHits = " << fFitReg[iAdc].fNhits << "]: sumX = " << fFitReg[iAdc].fSumX << ", sumY = " << fFitReg[iAdc].fSumY << ", sumX2 = " << fFitReg[iAdc].fSumX2 << ", sumY2 = " << fFitReg[iAdc].fSumY2 << ", sumXY        = " << fFitReg[iAdc].fSumXY;
     }
   }
 }
@@ -2721,3 +2750,101 @@ Bool_t AliTRDmcmSim::ReadPackedConfig(AliTRDtrapConfig *cfg, Int_t hc, UInt_t *d
   AliDebugClass(5, Form("no end marker! %d words read", idx));
   return -err; // only if the max length of the block reached!
 }
+
+
+
+/*
+void PrintDmemValue3(AliTRDtrapConfig::AliTRDtrapDmemWord *trapval, std::ostream &output)
+{
+   output << "\t AllocationMode : " << trapval->fAllocMode << std::endl;
+   output << "\t Array size : " << trapval->GetDataSize() << std::endl;
+   for(int dataarray=0;dataarray<trapval->GetDataSize();dataarray++){
+         output << "\t " << trapval->GetDataRaw(dataarray) << " : valid : " << trapval->GetValidRaw(dataarray) << std::endl;
+   }
+}
+void PrintRegisterValue3(AliTRDtrapConfig::AliTRDtrapRegister *trapval, std::ostream &output)
+{
+     output << "\t AllocationMode : " << trapval->GetAllocMode() << std::endl;
+     output << "\t Array size : " << trapval->GetDataSize() << std::endl;
+     for(int dataarray=0;dataarray<trapval->GetDataSize();dataarray++){
+         output << "\t " << trapval->GetDataRaw(dataarray) << " : valid : " << trapval->GetValidRaw(dataarray) << std::endl;
+     }
+}
+
+void AliTRDmcmSim::DumpTrapConfig()
+{
+   std::ofstream run2config("run2trapconfig-AsExecuted-insim.txt");
+    run2config <<"DUMP TRAP CONFIG START " << std::endl;
+  run2config << "Trap Registers : " << std::endl;
+  run2config << &fTrapConfig << std::endl;
+  for (int regvalue = 0; regvalue < AliTRDtrapConfig::kLastReg; regvalue++) {
+      run2config << " Trap : "<< fTrapConfig->fRegisterValue[regvalue].GetName() 
+                << " at : 0x " << std::hex << fTrapConfig->fRegisterValue[regvalue].GetAddr() <<std::dec
+                << " with nbits : " << fTrapConfig->fRegisterValue[regvalue].GetNbits() 
+                << " and reset value of : " << fTrapConfig->fRegisterValue[regvalue].GetResetValue() << std::endl;
+              // now for the inherited AliTRDtrapValue members;
+              PrintRegisterValue3(&fTrapConfig->fRegisterValue[regvalue],run2config);
+  }
+ 
+   //  run3config << "done with regiser values now for dmemwords" << std::endl;
+ run2config << "DMEM Words : " << std::endl;
+ for (int dmemwords = 0; dmemwords < AliTRDtrapConfig::fgkDmemWords; dmemwords++) {
+     // copy fName, fAddr
+    // inherited from trapvalue : fAllocMode, fSize fData and fValid
+    //        fTrapConfig->mDmem[dmemwords].mName= run2config->fDmem[dmemwords].fName; // this Gets set on setting the address
+  run2config << "Name : " <<  fTrapConfig->fDmem[dmemwords].GetName() << " :address : " << fTrapConfig->fDmem[dmemwords].fAddr << std::endl;
+ PrintDmemValue3(&fTrapConfig->fDmem[dmemwords],run2config);    
+  }
+    run2config <<"DUMP TRAP CONFIG END " << std::endl;
+    run2config.close();
+    exit(7);
+ }
+*/
+
+
+  void PrintDmemValue(AliTRDtrapConfig::AliTRDtrapDmemWord *trapval, ostream &output)
+  {
+  output << "\t AllocationMode : " << trapval->fAllocMode << std::endl;
+  output << "\t Array size : " << trapval->fSize << std::endl;
+  for(int dataarray=0;dataarray<trapval->fSize;dataarray++){
+  output << "\t " << trapval->fData[dataarray] << " : valid : " << trapval->fValid[dataarray] << std::endl;
+  }  
+  
+  }
+  void PrintRegisterValue(AliTRDtrapConfig::AliTRDtrapRegister *trapval, ostream &output)
+  {
+  output << "\t AllocationMode : " << trapval->fAllocMode << std::endl;
+  output << "\t Array size : " << trapval->fSize << std::endl;
+  for(int dataarray=0;dataarray<trapval->fSize;dataarray++){
+  output << "\t " << trapval->fData[dataarray] << " : valid : " << trapval->fValid[dataarray] << std::endl;
+  }  
+  
+  }
+  
+  
+void AliTRDmcmSim::DumpTrapConfig()
+{
+    std::ofstream run2config("run2trapconfig-AsReadFromCVMFS.txt");
+  run2config << "Trap Registers : " << std::endl;
+  for (int regvalue = 0; regvalue < AliTRDtrapConfig::kLastReg; regvalue++) {
+      run2config << " Trap : "<< fTrapConfig->fRegisterValue[regvalue].GetName() 
+      << " at : 0x " << std::hex << fTrapConfig->fRegisterValue[regvalue].GetAddr() <<std::dec
+      << " with nbits : " << fTrapConfig->fRegisterValue[regvalue].GetNbits() 
+      << " and reset value of : " << fTrapConfig->fRegisterValue[regvalue].GetResetValue() << std::endl;
+  // now for the inherited AliTRDtrapValue members;
+      PrintRegisterValue(&fTrapConfig->fRegisterValue[regvalue],run2config);
+  }
+  //  
+  //  //  run2config << "done with regiser values now for dmemwords" << std::endl;
+  run2config << "DMEM Words : " << std::endl;
+  for (int dmemwords = 0; dmemwords < AliTRDtrapConfig::fgkDmemWords; dmemwords++) {
+      // copy fName, fAddr
+      // inherited from trapvalue : fAllocMode, fSize fData and fValid
+      //  fTrapConfig->mDmem[dmemwords].mName= run2config->fDmem[dmemwords].fName; // this gets set on setting the address
+      run2config << "Name : " <<  fTrapConfig->fDmem[dmemwords].fName << " :address : " << fTrapConfig->fDmem[dmemwords].fAddr << std::endl;
+      PrintDmemValue(&fTrapConfig->fDmem[dmemwords],run2config);  
+  }
+  //  ofstream run2cnofig
+  
+}
+

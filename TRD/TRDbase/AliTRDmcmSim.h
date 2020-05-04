@@ -39,6 +39,7 @@ class AliTRDmcmSim : public TObject {
 
           void      SetDebugStream(TTreeSRedirector *stream) { fDebugStream = stream; }
   TTreeSRedirector* GetDebugStream() const { return fDebugStream; }
+void DumpTrapConfig();
 
 	  Bool_t    LoadMCM(AliRunLoader* const runloader, Int_t det, Int_t rob, Int_t mcm);
 

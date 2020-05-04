@@ -217,7 +217,7 @@ AliTRDdigitizer::~AliTRDdigitizer()
 
   delete fGeo;
   fGeo = 0;
-  //std::cout << "Digits Produced : "  << fDigitCount << std::endl;
+  std::cout << "Digits Produced : "  << fDigitCount << std::endl;
 }
 
 //_____________________________________________________________________________
@@ -1209,7 +1209,7 @@ Bool_t AliTRDdigitizer::Signal2ADC(Int_t det, AliTRDarraySignal *signals)
   //
   // Converts the sampled electron signals to ADC values for a given chamber
   //
-    //std::cout << "ENTER: " << __FILE__ << ":" << __func__ << ":" << __LINE__ << " for det = " << det << std::endl;
+ ///   std::cout << "ENTER: " << __FILE__ << ":" << __func__ << ":" << __LINE__ << " for det = " << det << std::endl;
   AliDebug(1,Form("Start converting signals to ADC values for detector=%d",det));
 
   AliTRDcalibDB     *calibration = AliTRDcalibDB::Instance();
@@ -1297,7 +1297,9 @@ Bool_t AliTRDdigitizer::Signal2ADC(Int_t det, AliTRDarraySignal *signals)
   // Create the digits for this chamber
   for (row  = 0; row  <  nRowMax; row++ ) {
     for (col  = 0; col  <  nColMax; col++ ) {
-      //std::cout << "Row:Col :: " << row<<":"<<col<< std::endl;
+          int rob = AliTRDfeeParam::Instance()->GetROBfromPad(row, col);
+          int mcm = AliTRDfeeParam::Instance()->GetMCMfromPad(row, col);
+    //  std::cout << "Row:Col :: " << row<<":"<<col<< " (rob,mcm)_=("<<rob<<","<<mcm<<  ")"<< std::endl;
       // halfchamber masking
       Int_t iMcm            = (Int_t)(col/18); // current group of 18 col pads
       Int_t halfchamberside = (iMcm>3 ? 1 : 0); // 0=Aside, 1=Bside
@@ -1320,10 +1322,10 @@ Bool_t AliTRDdigitizer::Signal2ADC(Int_t det, AliTRDarraySignal *signals)
       }
 
       for (time = 0; time < nTimeTotal; time++) {
-        //std::cout << "t:"<< time<<"::";
+     //   std::cout << time<<":";
 	// Get the signal amplitude
         Float_t signalAmp = signals->GetData(row,col,time);
-        //std::cout<<signalAmp<<"-->";
+    //    std::cout<<(int)signalAmp<<"(";
         // Pad and time coupling
         signalAmp *= coupling;
 	// Gain factors
@@ -1347,11 +1349,12 @@ Bool_t AliTRDdigitizer::Signal2ADC(Int_t det, AliTRDarraySignal *signals)
         else {
           adc = TMath::Nint(signalAmp * adcConvert);
 	}
-    //std::cout << adc <<std::endl;
+   // std::cout << adc <<") ";
         // Saving all digits
 	digits->SetData(row,col,time,adc);
 
       } // for: time
+   // std::cout << std::endl;
 
     } // for: col
   } // for: row
@@ -1973,13 +1976,11 @@ void AliTRDdigitizer::RunDigitalProcessing(Int_t det)
   //
   // Run the digital processing in the TRAP
   //
-
   AliTRDfeeParam *feeParam = AliTRDfeeParam::Instance();
 
   AliTRDarrayADC *digits = fDigitsManager->GetDigits(det);
   if (!digits)
     return;
-
   //Call the methods in the mcm class using the temporary array as input  
   // process the data in the same order as in hardware
   std::cout << "**********************************************************************" << std::endl;
@@ -2001,8 +2002,6 @@ void AliTRDdigitizer::RunDigitalProcessing(Int_t det)
 	}
 	fMcmSim->ZSMapping();
 	fMcmSim->WriteData(digits);
-    fMcmSim->Draw();
-    fMcmSim->Print();
       }
     }
   }
@@ -2011,5 +2010,6 @@ void AliTRDdigitizer::RunDigitalProcessing(Int_t det)
   std::cout << "*******************   END DIGITAL PROCESSING *************************" << std::endl;
   std::cout << "**********************************************************************" << std::endl;
   std::cout << "**********************************************************************" << std::endl;
+//  fMcmSim->DumpTrapConfig();
 }
 
