@@ -42,6 +42,7 @@
 #include <TRandom.h>
 #include <TTree.h>
 #include <iostream>
+#include <chrono>
 
 #include "AliRun.h"
 #include "AliMC.h"
@@ -267,6 +268,10 @@ void AliTRDdigitizer::Digitize(const Option_t* option)
 
   AliTRDdigitsManager *sdigitsManager;
 
+  std::chrono::time_point<std::chrono::system_clock> starttime;
+  starttime=std::chrono::system_clock::now();
+  AliInfo(Form("digitisation start at : %d", starttime));
+  //write out start time to logs 
   TString optionString = option;
   if (optionString.Contains("deb")) {
     AliLog::SetClassDebugLevel("AliTRDdigitizer",1);
@@ -382,6 +387,13 @@ void AliTRDdigitizer::Digitize(const Option_t* option)
   DeleteSDigitsManager();
 
   AliDebug(1,"Done");
+  //write out end time to logs 
+  std::chrono::time_point<std::chrono::system_clock> endtime;
+  endtime=std::chrono::system_clock::now();
+  std::cout << "digitisation start : " <<  starttime));
+  std::cout << "digitisation end : " << endtime;
+  std::chrono::duration<double> timetaken=endtime-starttime;
+  std::cout << "digitsation took : " << timetaken.count();
 
 }
 
@@ -1976,6 +1988,8 @@ void AliTRDdigitizer::RunDigitalProcessing(Int_t det)
   //
   // Run the digital processing in the TRAP
   //
+  std::chrono::time_point<std::chrono::system_clock> starttime;
+  starttime=std::chrono::system_clock::now();
   AliTRDfeeParam *feeParam = AliTRDfeeParam::Instance();
 
   AliTRDarrayADC *digits = fDigitsManager->GetDigits(det);
@@ -2011,5 +2025,12 @@ void AliTRDdigitizer::RunDigitalProcessing(Int_t det)
   std::cout << "**********************************************************************" << std::endl;
   std::cout << "**********************************************************************" << std::endl;
 //  fMcmSim->DumpTrapConfig();
+  std::chrono::time_point<std::chrono::system_clock> endtime;
+  endtime=std::chrono::system_clock::now();
+  std::cout << "mcmsim start : " <<  starttime));
+  std::cout << "mcmsim end : " << endtime;
+  std::chrono::duration<double> timetaken=endtime-starttime;
+  std::cout << "mcmsim took : " << timetaken.count();
+
 }
 
