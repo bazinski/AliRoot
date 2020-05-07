@@ -268,9 +268,10 @@ void AliTRDdigitizer::Digitize(const Option_t* option)
 
   AliTRDdigitsManager *sdigitsManager;
 
-  std::chrono::time_point<std::chrono::system_clock> starttime;
-  starttime=std::chrono::system_clock::now();
-  AliInfo(Form("digitisation start at : %d", starttime));
+  std::chrono::time_point<std::chrono::high_resolution_clock> starttime;
+  starttime=std::chrono::high_resolution_clock::now();
+  std::time_t starttime_t=std::chrono::high_resolution_clock::to_time_t(starttime);
+    std::cout << "digitisation start at : " << starttime_t;
   //write out start time to logs 
   TString optionString = option;
   if (optionString.Contains("deb")) {
@@ -388,10 +389,11 @@ void AliTRDdigitizer::Digitize(const Option_t* option)
 
   AliDebug(1,"Done");
   //write out end time to logs 
-  std::chrono::time_point<std::chrono::system_clock> endtime;
-  endtime=std::chrono::system_clock::now();
-  std::cout << "digitisation start : " <<  starttime));
-  std::cout << "digitisation end : " << endtime;
+  std::chrono::time_point<std::chrono::high_resolution_clock> endtime;
+  endtime=std::chrono::high_resolution_clock::now();
+  std::time_t endtime_t=std::chrono::high_resolution_clock::to_time_t(endtime);
+  std::cout << "digitisation start : " <<  starttime_t;
+  std::cout << "digitisation end : " << endtime_t;
   std::chrono::duration<double> timetaken=endtime-starttime;
   std::cout << "digitsation took : " << timetaken.count();
 
@@ -1988,8 +1990,9 @@ void AliTRDdigitizer::RunDigitalProcessing(Int_t det)
   //
   // Run the digital processing in the TRAP
   //
-  std::chrono::time_point<std::chrono::system_clock> starttime;
-  starttime=std::chrono::system_clock::now();
+  std::chrono::time_point<std::chrono::high_resolution_clock> starttime;
+  starttime=std::chrono::high_resolution_clock::now();
+  std::time_t starttime_t=std::chrono::high_resolution_clock::to_time_t(starttime);
   AliTRDfeeParam *feeParam = AliTRDfeeParam::Instance();
 
   AliTRDarrayADC *digits = fDigitsManager->GetDigits(det);
@@ -2025,10 +2028,11 @@ void AliTRDdigitizer::RunDigitalProcessing(Int_t det)
   std::cout << "**********************************************************************" << std::endl;
   std::cout << "**********************************************************************" << std::endl;
 //  fMcmSim->DumpTrapConfig();
-  std::chrono::time_point<std::chrono::system_clock> endtime;
-  endtime=std::chrono::system_clock::now();
-  std::cout << "mcmsim start : " <<  starttime));
-  std::cout << "mcmsim end : " << endtime;
+  std::chrono::time_point<std::chrono::high_resolution_clock> endtime;
+  endtime=std::chrono::high_resolution_clock::now();
+  std::time_t endtime_t=std::chrono::high_resolution_clock::to_time_t(endtime);
+  std::cout << "mcmsim start : " <<  starttime_t;
+  std::cout << "mcmsim end : " << endtime_t;
   std::chrono::duration<double> timetaken=endtime-starttime;
   std::cout << "mcmsim took : " << timetaken.count();
 
