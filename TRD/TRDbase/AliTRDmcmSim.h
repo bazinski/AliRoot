@@ -122,6 +122,7 @@ class AliTRDmcmSim : public TObject {
 	  void      Draw(Option_t* const option ="");         // draw data (ADC data, hits and tracklets)
 
   friend  std::ostream& operator<<(std::ostream &os, const AliTRDmcmSim &mcm); // data output using ostream (e.g. cout << mcm;)
+  std::ostream& Printout(std::ostream &os); // data output using ostream (e.g. cout << mcm;)
   static  ostream&  Cfdat(ostream &os);                       // manipulator to activate cfdat output
   static  ostream&  Raw  (ostream &os);                       // manipulator to activate raw output
   static  ostream&  Text (ostream &os);                       // manipulator to activate text output
